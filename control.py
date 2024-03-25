@@ -54,6 +54,10 @@ def inverse(x, y, z):
     l1 = 0.049
     l2 = 0.065
     l3 = 0.095
+    origin_offset = 30.942e-3
+
+    z+=origin_offset
+
     
     alpha = math.atan2(y, x)
     

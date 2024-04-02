@@ -51,7 +51,7 @@ def inverse(x, y, z):
     - Entrée: x, y, z, une position cible dans le repère de la patte (mètres), provenant du slider
     - Sortie: un tableau contenant les 3 positions angulaires cibles (en radians)
     """
-    l1 = 0.049
+    l1 = 42.271e-3 #0.049
     l2 = 0.065
     l3 = 0.095
     origin_offset = 30.942e-3
@@ -166,7 +166,6 @@ def triangle(target_angle):
     
     return newtriangle
     
-
         
 
 def walk(t, speed_x, speed_y, speed_rotation):
@@ -181,8 +180,8 @@ def walk(t, speed_x, speed_y, speed_rotation):
     - Sortie: un tableau contenant les 12 positions angulaires cibles (radian) pour les moteurs
     """
     speed_multiplier = 300. * speed_x #15. * np.sqrt(speed_x*speed_x + speed_y*speed_y)
-    targets = [0]*12
-    legs_phase = [0., 1.5, 0., 1.5]
+    targets = [0]*18
+    legs_phase = [0., 1.5, 0., 1.5, 0., 1.5]
     target_angle = 0 #20 * np.pi * speed_y #np.arctan(speed_y/(speed_x+0.000000001))
     resting_pos = (0.1, 0., -0.1)
     pattern_size = 20 * speed_y
@@ -194,10 +193,10 @@ def walk(t, speed_x, speed_y, speed_rotation):
         movement_pattern[i] = pattern_size * tmp[i]
 
     # positions in legs bases
-    leg_based_coordinates = [(0., 0., 0.)]*4
+    leg_based_coordinates = [(0., 0., 0.)]*6
 
     phi = 5*np.pi/4
-    for i in range(4):
+    for i in range(6):
         segment_idx = int(t*speed_multiplier+legs_phase[i]) % len(movement_pattern)
         t_in_segment = (t*speed_multiplier+legs_phase[i]) % 1
 
@@ -213,7 +212,7 @@ def walk(t, speed_x, speed_y, speed_rotation):
         
         phi -= np.pi/2
 
-    for i in range(4):
+    for i in range(6):
         (x, y, z) = leg_based_coordinates[i]
         tmp = inverse(x, y, z)
         for j in range(3):

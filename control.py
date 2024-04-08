@@ -196,8 +196,16 @@ def walk(t, speed_x, speed_y, speed_rotation):
     targets = [0]*18
     legs_phase = [0., 1.5, 0., 1.5, 0., 1.5]
     target_angle = 0 #20 * np.pi * speed_y #np.arctan(speed_y/(speed_x+0.000000001))
-    resting_pos = (0.1, 0., -0.1)
+    resting_pos = (0.15, 0., -0.15)
     pattern_size = 20 * speed_y
+
+    RESTING_POS = np.array([[0.]*3]*6)
+    radius = 0.2
+
+    phase = np.pi/3
+    for i in range(6):
+        RESTING_POS[i] = [radius*np.cos(phase), radius*np.sin(phase), -0.15]
+        phase += np.pi/3
 
     tmp = triangle(target_angle)
 
@@ -208,22 +216,35 @@ def walk(t, speed_x, speed_y, speed_rotation):
     # positions in legs bases
     leg_based_coordinates = [(0., 0., 0.)]*6
 
-    phi = 5*np.pi/4
+    POS_PATES = np.array([
+        [ 0.033,  0.08, 0.],
+        [-0.033,  0.08, 0.],
+        [-0.095,  0.00, 0.],
+        [-0.033, -0.08, 0.],
+        [ 0.033, -0.08, 0.],
+        [ 0.095,  0.00, 0.]
+    ])
+
+    ANGLES_PATES = (0., 0., 3*np.pi/2, np.pi, np.pi, np.pi/2)
+
+    offset = -np.pi/2
+
     for i in range(6):
+        phi = ANGLES_PATES[i] + offset
+
         segment_idx = int(t*speed_multiplier+legs_phase[i]) % len(movement_pattern)
         t_in_segment = (t*speed_multiplier+legs_phase[i]) % 1
 
-        target_position = interpolate(np.array(movement_pattern[segment_idx]), np.array(movement_pattern[(segment_idx+1) % len(movement_pattern)]), t_in_segment)
+        target_position = RESTING_POS[i] + interpolate(np.array(movement_pattern[segment_idx]), np.array(movement_pattern[(segment_idx+1) % len(movement_pattern)]), t_in_segment)
 
         (x, y, z) = target_position
-    
-        A = np.array(  [ [np.cos(phi), -np.sin(phi), 0],
-                         [np.sin(phi),  np.cos(phi), 0],
-                         [          0,            0, 1]])
 
-        leg_based_coordinates[i] = tuple(np.dot(A, target_position) + resting_pos)
-        
-        phi -= np.pi/2
+        A = np.array(  [ [np.cos(phi), -np.sin(phi), 0.],
+                         [np.sin(phi),  np.cos(phi), 0.],
+                         [          0,            0, 1.]])
+
+        leg_based_coordinates[i] = tuple(np.dot(A, target_position - POS_PATES[i]))
+    
 
     for i in range(6):
         (x, y, z) = leg_based_coordinates[i]

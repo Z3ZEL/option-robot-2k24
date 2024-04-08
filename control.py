@@ -188,7 +188,7 @@ for i in range(6):
     RESTING_POS[i] = [radius*np.cos(phase), radius*np.sin(phase), -0.15]
     phase += np.pi/3
 
-POS_PATES = np.array([
+ORIGINE_PATES = np.array([
     [ 0.033,  0.08, 0.],
     [-0.033,  0.08, 0.],
     [-0.095,  0.00, 0.],
@@ -199,51 +199,54 @@ POS_PATES = np.array([
 
 ANGLES_PATES = (0., 0., 3*np.pi/2, np.pi, np.pi, np.pi/2)
 
+MATRICES_ROTATION_PATES = []
+
+offset = -np.pi/2
+for i in range(6):
+    phi = ANGLES_PATES[i] + offset
+
+    A = np.array(  [ [np.cos(phi), -np.sin(phi), 0.],
+                     [np.sin(phi),  np.cos(phi), 0.],
+                     [          0,            0, 1.]])
+
+    MATRICES_ROTATION_PATES.append(A)
+
+LEGS_PHASE = [0., 1.57, 0., 1.57, 0., 1.57]
+
 def walk(t, speed_x, speed_y, speed_rotation):
     """
     python simulator.py -m walk
-
-    Le but est d'intégrer tout ce que nous avons vu ici pour faire marcher le robot
 
     - Sliders: speed_x, speed_y, speed_rotation, la vitesse cible du robot
     - Entrée: t, le temps (secondes écoulées depuis le début)
             speed_x, speed_y, et speed_rotation, vitesses cibles contrôlées par les sliders
     - Sortie: un tableau contenant les 12 positions angulaires cibles (radian) pour les moteurs
     """
-    speed_multiplier = 300. * speed_x #15. * np.sqrt(speed_x*speed_x + speed_y*speed_y)
-    targets = [0]*18
-    legs_phase = [0., 1.57, 0., 1.57, 0., 1.57]
-    target_angle = speed_rotation #np.arctan(speed_y/(speed_x+0.000000001))
-    pattern_size = 20 * speed_y
+    speed_multiplier = 300. * speed_x 
+    target_angle = speed_rotation
+    pattern_size = 20. * speed_y
 
-    tmp = triangle(target_angle)
-
+    # création du patterne pour la marche
     movement_pattern = [(0., 0., 0.)]*3
-    for i in range(len(tmp)):
-        movement_pattern[i] = pattern_size * tmp[i]
+    pat = triangle(target_angle)
+    for i in range(len(pat)):
+        movement_pattern[i] = pattern_size * pat[i]
 
     # positions in legs bases
     leg_based_coordinates = [(0., 0., 0.)]*6
 
-
-    offset = -np.pi/2
-
     for i in range(6):
-        phi = ANGLES_PATES[i] + offset
-
-        segment_idx = int(t*speed_multiplier+legs_phase[i]) % len(movement_pattern)
-        t_in_segment = (t*speed_multiplier+legs_phase[i]) % 1
+        segment_idx = int(t*speed_multiplier+LEGS_PHASE[i]) % len(movement_pattern)
+        t_in_segment = (t*speed_multiplier+LEGS_PHASE[i]) % 1
 
         target_position = RESTING_POS[i] + interpolate(np.array(movement_pattern[segment_idx]), np.array(movement_pattern[(segment_idx+1) % len(movement_pattern)]), t_in_segment)
 
         (x, y, z) = target_position
 
-        A = np.array(  [ [np.cos(phi), -np.sin(phi), 0.],
-                         [np.sin(phi),  np.cos(phi), 0.],
-                         [          0,            0, 1.]])
-
-        leg_based_coordinates[i] = tuple(np.dot(A, target_position - POS_PATES[i]))
+        leg_based_coordinates[i] = tuple(np.dot(MATRICES_ROTATION_PATES[i], target_position - ORIGINE_PATES[i]))
     
+    # converting to angles
+    targets = [0]*18
 
     for i in range(6):
         (x, y, z) = leg_based_coordinates[i]

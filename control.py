@@ -78,7 +78,7 @@ def inverse(x, y, z):
 
     tmp_angle = np.pi/6
 
-    PHASE = np.array([0, tmp_angle, -np.pi/2+tmp_angle])
+    PHASE = np.array([0, tmp_angle, -np.pi/2+tmp_angle+np.pi/30])
 
     res = np.array([alpha, beta, gamma]) 
     res += PHASE
@@ -127,23 +127,36 @@ def legs(targets_robot):
     """
 
     # positions in legs bases
-    leg_based_coordinates = [(0.0, 0., 0.)]*4
+    leg_based_coordinates = [(0.0, 0., 0.)]*6
 
-    phi = 5*np.pi/4
-    for i in range(4):
-        A = np.array(  [ [np.cos(phi), -np.sin(phi), 0],
-                         [np.sin(phi),  np.cos(phi), 0],
-                         [          0,            0, 1]])
+    POS_PATES = np.array([[0.]*3]*6)
 
-        leg_based_coordinates[i] = tuple(np.dot(A, targets_robot[i]) + (-0.02, 0., 0.))
+    POS_PATES = np.array([
+        [ 0.033,  0.08, 0.],
+        [-0.033,  0.08, 0.],
+        [-0.095,  0.00, 0.],
+        [-0.033, -0.08, 0.],
+        [ 0.033, -0.08, 0.],
+        [ 0.095,  0.00, 0.]
+    ])
+
+    ANGLES_PATES = (0., 0., 3*np.pi/2, np.pi, np.pi, np.pi/2)
+
+    offset = -np.pi/2 #targets_robot[0][0]*8*np.pi
+    for i in range(6):
+        phi = ANGLES_PATES[i] + offset
+        A = np.array(  [ [np.cos(phi), -np.sin(phi), 0.],
+                         [np.sin(phi),  np.cos(phi), 0.],
+                         [          0,            0, 1.]])
+
+        leg_based_coordinates[i] = tuple(np.dot(A, targets_robot[i] - POS_PATES[i]))
         
-        phi -= np.pi/2
 
     print();
 
-    targets = [0]*12
+    targets = [0]*18
 
-    for i in range(4):
+    for i in range(6):
         (x, y, z) = leg_based_coordinates[i]
         tmp = inverse(x, y, z)
         for j in range(3):

@@ -167,7 +167,7 @@ def legs(targets_robot):
 
 
 def triangle(target_angle):
-    triangle = [(-0.1, 0., 0), (0., 0., 0.1), (0.1, 0., 0.)]
+    triangle = [(-0.1, 0., 0), (0., 0., 0.15), (0.1, 0., 0.)]
     phi = target_angle
     A = np.array(  [ [np.cos(phi), -np.sin(phi), 0],
                      [np.sin(phi),  np.cos(phi), 0],
@@ -180,6 +180,24 @@ def triangle(target_angle):
     return newtriangle
     
         
+# RESTING POSITIONS 
+radius = 0.2
+RESTING_POS = np.array([[0.]*3]*6)
+phase = np.pi/3
+for i in range(6):
+    RESTING_POS[i] = [radius*np.cos(phase), radius*np.sin(phase), -0.15]
+    phase += np.pi/3
+
+POS_PATES = np.array([
+    [ 0.033,  0.08, 0.],
+    [-0.033,  0.08, 0.],
+    [-0.095,  0.00, 0.],
+    [-0.033, -0.08, 0.],
+    [ 0.033, -0.08, 0.],
+    [ 0.095,  0.00, 0.]
+])
+
+ANGLES_PATES = (0., 0., 3*np.pi/2, np.pi, np.pi, np.pi/2)
 
 def walk(t, speed_x, speed_y, speed_rotation):
     """
@@ -194,18 +212,9 @@ def walk(t, speed_x, speed_y, speed_rotation):
     """
     speed_multiplier = 300. * speed_x #15. * np.sqrt(speed_x*speed_x + speed_y*speed_y)
     targets = [0]*18
-    legs_phase = [0., 1.5, 0., 1.5, 0., 1.5]
-    target_angle = 0 #20 * np.pi * speed_y #np.arctan(speed_y/(speed_x+0.000000001))
-    resting_pos = (0.15, 0., -0.15)
+    legs_phase = [0., 1.57, 0., 1.57, 0., 1.57]
+    target_angle = speed_rotation #np.arctan(speed_y/(speed_x+0.000000001))
     pattern_size = 20 * speed_y
-
-    RESTING_POS = np.array([[0.]*3]*6)
-    radius = 0.2
-
-    phase = np.pi/3
-    for i in range(6):
-        RESTING_POS[i] = [radius*np.cos(phase), radius*np.sin(phase), -0.15]
-        phase += np.pi/3
 
     tmp = triangle(target_angle)
 
@@ -216,16 +225,6 @@ def walk(t, speed_x, speed_y, speed_rotation):
     # positions in legs bases
     leg_based_coordinates = [(0., 0., 0.)]*6
 
-    POS_PATES = np.array([
-        [ 0.033,  0.08, 0.],
-        [-0.033,  0.08, 0.],
-        [-0.095,  0.00, 0.],
-        [-0.033, -0.08, 0.],
-        [ 0.033, -0.08, 0.],
-        [ 0.095,  0.00, 0.]
-    ])
-
-    ANGLES_PATES = (0., 0., 3*np.pi/2, np.pi, np.pi, np.pi/2)
 
     offset = -np.pi/2
 

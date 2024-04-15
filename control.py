@@ -236,7 +236,7 @@ def walk(t, speed_x, speed_y, speed_rotation):
     global last_t_in_segment
     delta_t = t-time
 
-    speed_multiplier = 300. * np.sqrt(speed_x*speed_x + speed_y*speed_y)
+    speed_multiplier = 15. * np.sqrt(speed_x*speed_x + speed_y*speed_y)
     pattern_size = 0.6
     speed_rotation_multiplier = speed_rotation
 

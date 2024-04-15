@@ -225,8 +225,16 @@ def rot_angle_from_pattern(speed_rotation, segment_idx, t_in_segment):
     else: # phase de contact au sol
         angle = interpolate(speed_rotation, -speed_rotation, t_in_segment)
     return angle
+
+last_segment_idx = 0
+last_t_in_segment = 0
+time = 0
     
 def walk(t, speed_x, speed_y, speed_rotation):
+    global time
+    global last_segment_idx
+    global last_t_in_segment
+    delta_t = t-time
 
     speed_multiplier = 300. * np.sqrt(speed_x*speed_x + speed_y*speed_y)
     pattern_size = 0.6
@@ -251,10 +259,17 @@ def walk(t, speed_x, speed_y, speed_rotation):
     for i in range(len(pat)):
         movement_pattern[i] = pattern_size * pat[i]
 
+    base_segment_idx = (last_segment_idx + int(last_t_in_segment+speed_multiplier*delta_t)) % len(movement_pattern)
+    base_t_in_segment = (last_t_in_segment+speed_multiplier*delta_t) % 1
+
+
     targets = [0.]*18
     for i in range(6):
-        segment_idx = int(t*speed_multiplier+LEGS_PHASE[i]) % len(movement_pattern)
-        t_in_segment = (t*speed_multiplier+LEGS_PHASE[i]) % 1
+        segment_idx = (base_segment_idx + int(base_t_in_segment+LEGS_PHASE[i])) % len(movement_pattern)
+        t_in_segment = (base_t_in_segment+LEGS_PHASE[i]) % 1
+
+        #segment_idx = int(t*speed_multiplier+LEGS_PHASE[i]) % len(movement_pattern)
+        #t_in_segment = (t*speed_multiplier+LEGS_PHASE[i]) % 1
 
         target_pos = [0.]*3
         phi = rot_angle_from_pattern(speed_rotation_multiplier, segment_idx, t_in_segment)
@@ -267,6 +282,10 @@ def walk(t, speed_x, speed_y, speed_rotation):
         tmp = target_angles_from_abs_pos(i, target_pos)
         for j in range(3):
             targets[3*i+j] = tmp[j]
+
+    time = t
+    last_segment_idx = base_segment_idx
+    last_t_in_segment = base_t_in_segment
     return targets
 
 def walk2(t, speed_x, speed_y, speed_rotation):

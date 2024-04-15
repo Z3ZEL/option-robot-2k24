@@ -230,7 +230,7 @@ last_segment_idx = 0
 last_t_in_segment = 0
 time = 0
     
-def walk(t, speed_x, speed_y, speed_rotation, height):
+def walk(t, speed_x, speed_y, speed_rotation, height = 0):
     global time
     global last_segment_idx
     global last_t_in_segment
@@ -284,50 +284,6 @@ def walk(t, speed_x, speed_y, speed_rotation, height):
     time = t
     last_segment_idx = base_segment_idx
     last_t_in_segment = base_t_in_segment
-    return targets
-
-def walk2(t, speed_x, speed_y, speed_rotation):
-    """
-    python simulator.py -m walk
-
-    - Sliders: speed_x, speed_y, speed_rotation, la vitesse cible du robot
-    - Entrée: t, le temps (secondes écoulées depuis le début)
-            speed_x, speed_y, et speed_rotation, vitesses cibles contrôlées par les sliders
-    - Sortie: un tableau contenant les 12 positions angulaires cibles (radian) pour les moteurs
-    """
-    speed_multiplier = 300. * speed_x 
-    target_angle = speed_rotation
-    pattern_size = 20. * speed_y
-
-    # création du patterne pour la marche
-    movement_pattern = [(0., 0., 0.)]*3
-    pat = triangle(target_angle)
-    for i in range(len(pat)):
-        movement_pattern[i] = pattern_size * pat[i]
-
-    # positions in legs bases
-    leg_based_coordinates = [(0., 0., 0.)]*6
-
-    for i in range(6):
-        segment_idx = int(t*speed_multiplier+LEGS_PHASE[i]) % len(movement_pattern)
-        t_in_segment = (t*speed_multiplier+LEGS_PHASE[i]) % 1
-
-        target_position = RESTING_POS[i] + interpolate(np.array(movement_pattern[segment_idx]), np.array(movement_pattern[(segment_idx+1) % len(movement_pattern)]), t_in_segment)
-
-        (x, y, z) = target_position
-
-        leg_based_coordinates[i] = tuple(np.dot(MATRICES_ROTATION_PATES[i], target_position - ORIGINE_PATES[i]))
-    
-    # converting to angles
-    targets = [0]*18
-
-    for i in range(6):
-        (x, y, z) = leg_based_coordinates[i]
-        tmp = inverse(x, y, z)
-        for j in range(3):
-            targets[3*i+j] = tmp[j]
-
-
     return targets
 
 if __name__ == "__main__":

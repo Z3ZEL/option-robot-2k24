@@ -213,7 +213,50 @@ for i in range(6):
 
 LEGS_PHASE = [0., 1.57, 0., 1.57, 0., 1.57]
 
+def target_angles_from_abs_pos(index_pate, pos):
+    (x,y,z) = tuple(np.dot(MATRICES_ROTATION_PATES[index_pate], pos - ORIGINE_PATES[index_pate]))
+    return inverse(x,y,z)
+
+def rot_angle_from_pattern(speed_rotation, segment_idx, t_in_segment):
+    if segment_idx < 2: # phase de lever de la pate
+        newt = (t_in_segment + segment_idx) / 2
+        angle = interpolate(-speed_rotation, speed_rotation, newt)
+
+    else: # phase de contact au sol
+        angle = interpolate(speed_rotation, -speed_rotation, t_in_segment)
+    return angle
+    
 def walk(t, speed_x, speed_y, speed_rotation):
+
+    speed_multiplier = 300. * speed_x 
+    pattern_size = 0.6
+    speed_rotation_multiplier = speed_rotation
+
+    # création du patterne pour la marche
+    movement_pattern = [(0., 0., 0.)]*3
+    pat = triangle(speed_y*4)
+    for i in range(len(pat)):
+        movement_pattern[i] = pattern_size * pat[i]
+
+    targets = [0.]*18
+    for i in range(6):
+        segment_idx = int(t*speed_multiplier+LEGS_PHASE[i]) % len(movement_pattern)
+        t_in_segment = (t*speed_multiplier+LEGS_PHASE[i]) % 1
+
+        target_pos = [0.]*3
+        phi = rot_angle_from_pattern(speed_rotation_multiplier, segment_idx, t_in_segment)
+        A = np.array(  [ [np.cos(phi), -np.sin(phi), 0.],
+                         [np.sin(phi),  np.cos(phi), 0.],
+                         [          0,            0, 1.]])
+
+        target_pos = np.dot(A, RESTING_POS[i]) + interpolate(np.array(movement_pattern[segment_idx]), np.array(movement_pattern[(segment_idx+1) % len(movement_pattern)]), t_in_segment)
+
+        tmp = target_angles_from_abs_pos(i, target_pos)
+        for j in range(3):
+            targets[3*i+j] = tmp[j]
+    return targets
+
+def walk2(t, speed_x, speed_y, speed_rotation):
     """
     python simulator.py -m walk
 

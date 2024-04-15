@@ -230,7 +230,7 @@ last_segment_idx = 0
 last_t_in_segment = 0
 time = 0
     
-def walk(t, speed_x, speed_y, speed_rotation):
+def walk(t, speed_x, speed_y, speed_rotation, height):
     global time
     global last_segment_idx
     global last_t_in_segment
@@ -268,9 +268,6 @@ def walk(t, speed_x, speed_y, speed_rotation):
         segment_idx = (base_segment_idx + int(base_t_in_segment+LEGS_PHASE[i])) % len(movement_pattern)
         t_in_segment = (base_t_in_segment+LEGS_PHASE[i]) % 1
 
-        #segment_idx = int(t*speed_multiplier+LEGS_PHASE[i]) % len(movement_pattern)
-        #t_in_segment = (t*speed_multiplier+LEGS_PHASE[i]) % 1
-
         target_pos = [0.]*3
         phi = rot_angle_from_pattern(speed_rotation_multiplier, segment_idx, t_in_segment)
         A = np.array(  [ [np.cos(phi), -np.sin(phi), 0.],
@@ -278,6 +275,7 @@ def walk(t, speed_x, speed_y, speed_rotation):
                          [          0,            0, 1.]])
 
         target_pos = np.dot(A, RESTING_POS[i]) + interpolate(np.array(movement_pattern[segment_idx]), np.array(movement_pattern[(segment_idx+1) % len(movement_pattern)]), t_in_segment)
+        target_pos[2] += height
 
         tmp = target_angles_from_abs_pos(i, target_pos)
         for j in range(3):

@@ -228,13 +228,26 @@ def rot_angle_from_pattern(speed_rotation, segment_idx, t_in_segment):
     
 def walk(t, speed_x, speed_y, speed_rotation):
 
-    speed_multiplier = 300. * speed_x 
+    speed_multiplier = 300. * np.sqrt(speed_x*speed_x + speed_y*speed_y)
     pattern_size = 0.6
     speed_rotation_multiplier = speed_rotation
 
+    front = 0
+
+    if speed_x > 0:
+        front = np.arctan(speed_y/speed_x)
+    elif speed_x < 0:
+        front = np.arctan(speed_y/speed_x) + np.pi
+    elif speed_y == 0:
+        front = 0
+    elif speed_y >= 0:
+        front = np.pi/2
+    else:
+        front = -np.pi/2
+
     # création du patterne pour la marche
     movement_pattern = [(0., 0., 0.)]*3
-    pat = triangle(speed_y*4)
+    pat = triangle(front)
     for i in range(len(pat)):
         movement_pattern[i] = pattern_size * pat[i]
 

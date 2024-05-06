@@ -160,9 +160,9 @@ def main():
                 print("Walking...")
                 mov_key_pressed = time.time()
                 if c == "q":
-                    speed_rotation = math.pi/2
+                    speed_rotation = 0.2
                 if c == "d":
-                    speed_rotation = 3*math.pi/2
+                    speed_rotation = -0.2
 
         else:
             if time.time() - mov_key_pressed > 0.3:

@@ -63,7 +63,6 @@ class PS4Controller(object):
         max_speed_y = 0.3
         max_speed_rotation=0.2
         height = 0.04
-        paused=False
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.JOYAXISMOTION:
@@ -108,7 +107,7 @@ class PS4Controller(object):
                 #     f = self.axis_data[4]
                 #     current_height = f*height
 
-
+                current_height = height
                         
                 # Compute time since last iteration
                 t1 = time.time()
